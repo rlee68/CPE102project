@@ -112,6 +112,18 @@ class WorldModel:
       return self.entities
 
 
+   def find_open_around(self, pt, distance):
+      for dy in range(-distance, distance + 1):
+         for dx in range(-distance, distance + 1):
+            new_pt = point.Point(pt.x + dx, pt.y + dy)
+
+            if (self.within_bounds(new_pt) and
+               (not self.is_occupied(new_pt))):
+               return new_pt
+
+      return None
+
+
 
 def nearest_entity(entity_dists):
    if len(entity_dists) > 0:
