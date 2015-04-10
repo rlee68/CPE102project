@@ -4,6 +4,25 @@ import ordered_list
 import actions
 import occ_grid
 import point
+import image_store
+import random
+import math
+
+BLOB_ANIMATION_RATE_SCALE = 50
+BLOB_ANIMATION_MIN = 1
+BLOB_ANIMATION_MAX = 3
+
+ORE_CORRUPT_MIN = 20000
+ORE_CORRUPT_MAX = 30000
+
+QUAKE_STEPS = 10
+QUAKE_DURATION = 1100
+QUAKE_ANIMATION_RATE = 100
+
+VEIN_SPAWN_DELAY = 500
+VEIN_RATE_MIN = 8000
+VEIN_RATE_MAX = 17000
+
 
 class WorldModel:
    def __init__(self, num_rows, num_cols, background):
@@ -21,12 +40,12 @@ class WorldModel:
 
 
    def is_occupied(self, pt):
-      return (within_bounds(self, pt) and
-         occ_grid.get_cell(self.occupancy, pt) != None)
+      return (self.within_bounds(pt) and
+         self.occupancy.get_cell(pt) != None)
 
 
    def find_nearest(self, pt, type):
-      oftype = [(e, point.distance_sq(pt, entities.get_position(e)))
+      oftype = [(e, pt.distance_sq(e.get_position()))
          for e in self.entities if isinstance(e, type)]
 
       return nearest_entity(oftype)
@@ -35,10 +54,10 @@ class WorldModel:
    def add_entity(self, entity):
       pt = entity.get_position()
       if self.within_bounds(pt):
-         old_entity = occ_grid.get_cell(self.occupancy, pt)
+         old_entity = self.occupancy.get_cell(pt)
          if old_entity != None:
             old_entity.clear_pending_actions()
-         occ_grid.set_cell(self.occupancy, pt, entity)
+         self.occupancy.set_cell(pt, entity)
          self.entities.append(entity)
 
 
@@ -46,9 +65,9 @@ class WorldModel:
       tiles = []
       if self.within_bounds(pt):
          old_pt = entity.get_position()
-         occ_grid.set_cell(self.occupancy, old_pt, None)
+         self.occupancy.set_cell(old_pt, None)
          tiles.append(old_pt)
-         occ_grid.set_cell(self.occupancy, pt, entity)
+         self.occupancy.set_cell(pt, entity)
          tiles.append(pt)
          entity.set_position(pt)
 
@@ -61,19 +80,19 @@ class WorldModel:
 
    def remove_entity_at(self, pt):
       if (self.within_bounds(pt) and
-         occ_grid.get_cell(self.occupancy, pt) != None):
-         entity = occ_grid.get_cell(self.occupancy, pt)
+         self.occupancy.get_cell(pt) != None):
+         entity = self.occupancy.get_cell(pt)
          entity.set_position(point.Point(-1, -1))
          self.entities.remove(entity)
-         occ_grid.set_cell(self.occupancy, pt, None)
+         self.occupancy.set_cell(pt, None)
 
 
    def next_position(self, entity_pt, dest_pt):
-      horiz = sign(dest_pt.x - entity_pt.x)
+      horiz = actions.sign(dest_pt.x - entity_pt.x)
       new_pt = point.Point(entity_pt.x + horiz, entity_pt.y)
 
       if horiz == 0 or self.is_occupied(new_pt):
-         vert = sign(dest_pt.y - entity_pt.y)
+         vert = actions.sign(dest_pt.y - entity_pt.y)
          new_pt = point.Point(entity_pt.x, entity_pt.y + vert)
 
          if vert == 0 or self.is_occupied(new_pt):
@@ -83,13 +102,13 @@ class WorldModel:
 
 
    def blob_next_position(self, entity_pt, dest_pt):
-      horiz = sign(dest_pt.x - entity_pt.x)
+      horiz = actions.sign(dest_pt.x - entity_pt.x)
       new_pt = point.Point(entity_pt.x + horiz, entity_pt.y)
 
       if horiz == 0 or (self.is_occupied(new_pt) and
          not isinstance(self.get_tile_occupant(new_pt),
          entities.Ore)):
-         vert = sign(dest_pt.y - entity_pt.y)
+         vert = actions.sign(dest_pt.y - entity_pt.y)
          new_pt = point.Point(entity_pt.x, entity_pt.y + vert)
 
          if vert == 0 or (self.is_occupied(new_pt) and
@@ -122,22 +141,22 @@ class WorldModel:
 
    def get_background_image(self, pt):
       if self.within_bounds(pt):
-         return entities.get_image(occ_grid.get_cell(self.background, pt))
+         return self.background.get_cell(pt).get_image()
 
 
    def get_background(self, pt):
       if self.within_bounds(pt):
-         return occ_grid.get_cell(self.background, pt)
+         return self.background.get_cell(pt)
 
 
    def set_background(self, pt, bgnd):
       if self.within_bounds(pt):
-         occ_grid.set_cell(self.background, pt, bgnd)
+         self.background.set_cell(pt, bgnd)
 
 
    def get_tile_occupant(self, pt):
       if self.within_bounds(pt):
-         return occ_grid.get_cell(self.occupancy, pt)
+         return self.occupancy.get_cell(pt)
 
 
    def get_entities(self):
@@ -157,31 +176,31 @@ class WorldModel:
  
 
    def schedule_miner(self, miner, ticks, i_store):
-      actions.schedule_action(self, miner, miner.create_miner_action(world, i_store),
+      self.schedule_action_for(miner, miner.create_miner_action(self, i_store),
          ticks + miner.get_rate())
-      actions.schedule_animation(world, miner)
+      self.schedule_animation(miner)
 
 
    def schedule_vein(self, vein, ticks, i_store):
-      actions.schedule_action(self, vein, vein.create_vein_action(self, i_store),
+      self.schedule_action_for(vein, vein.create_vein_action(self, i_store),
          ticks + vein.get_rate())
 
 
    def schedule_ore(self, ore, ticks, i_store):
-      actions.schedule_action(self, ore,
+      self.schedule_action_for(ore,
          ore.create_ore_transform_action(self, i_store),
          ticks + ore.get_rate())
 
 
    def schedule_blob(self, blob, ticks, i_store):
-      actions.schedule_action(self, blob, blob.create_ore_blob_action(self, i_store),
+      self.schedule_action_for(blob, blob.create_ore_blob_action(self, i_store),
          ticks + blob.get_rate())
-      actions.schedule_animation(self, blob)
+      self.schedule_animation(blob)
 
 
    def schedule_quake(self, quake, ticks):
-      actions.schedule_animation(self, quake, QUAKE_STEPS)
-      actions.schedule_action(self, quake, actions.create_entity_death_action(self, quake),
+      self.schedule_animation(quake, QUAKE_STEPS)
+      self.schedule_action_for(quake, self.create_entity_death_action(quake),
          ticks + QUAKE_DURATION)
 
 
@@ -194,7 +213,7 @@ class WorldModel:
       return blob
 
 
-   def create_ore(world, name, pt, ticks, i_store):
+   def create_ore(self, name, pt, ticks, i_store):
       ore = entities.Ore(name, pt, image_store.get_images(i_store, 'ore'),
          random.randint(ORE_CORRUPT_MIN, ORE_CORRUPT_MAX))
       self.schedule_ore(ore, ticks, i_store)
@@ -214,6 +233,49 @@ class WorldModel:
          random.randint(VEIN_RATE_MIN, VEIN_RATE_MAX),
          pt, image_store.get_images(i_store, 'vein'))
       return vein
+
+   def create_entity_death_action(self, entity):
+      def action(current_ticks):
+         entity.remove_pending_action(action)
+         pt = entity.get_position()
+         self.remove_entity_from(entity)
+         return [pt]
+      return action
+
+   def remove_entity_from(self, entity):
+      for action in entity.get_pending_actions():
+         self.unschedule_action(action)
+      entity.clear_pending_actions()
+      self.remove_entity(entity)
+
+   def schedule_action_for(self, entity, action, time):
+      entity.add_pending_action(action)
+      self.schedule_action(action, time)
+
+   def schedule_animation(self, entity, repeat_count=0):
+      self.schedule_action_for(entity,
+         self.create_animation_action(entity, repeat_count),
+         entity.get_animation_rate())
+
+   def create_animation_action(self, entity, repeat_count):
+      def action(current_ticks):
+         entity.remove_pending_action(action)
+
+         entity.next_image()
+
+         if repeat_count != 1:
+            self.schedule_action_for(entity,
+               self.create_animation_action(entity, max(repeat_count - 1, 0)),
+               current_ticks + entity.get_animation_rate())
+
+         return [entity.get_position()]
+      return action
+
+   def clear_pending_actions(self, entity):
+      for action in entity.get_pending_actions():
+         self.unschedule_action(action)
+      entity.clear_pending_actions()
+
 
 
 def nearest_entity(entity_dists):
