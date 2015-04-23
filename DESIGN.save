@@ -1,3 +1,6 @@
+github:
+https://github.com/rlee68/CPE102project.git
+
 class: Background
 methods:
    get_images
@@ -193,6 +196,10 @@ methods:
    create_ore
    create_quake
    create_vein
+   create_entity_death_action
+   remove_entity_from
+   schedule_animation
+   create_animation_action
    
 Class: WorldView
 methods:
@@ -207,3 +214,38 @@ methods:
    update_mouse_cursor
    mouse_move
    
+
+Functions:
+actions.py:
+   sign - No logical class to put it in.
+
+builder_controller.py:
+   Didn't move any of the functions because there were no logical classes to
+      put it in.
+
+builder.py
+   Didn't move any of the functions because there were no logical classes to 
+      put it in.
+
+controller.py
+   Didn't move any of the functions becasue there were no logical classes to 
+      put it in. 
+   activity_loop - Part of pygame setup.
+
+image_store.py
+   Didn't move any of the functions because there were no logical classes to
+      put it in.
+
+save_load.py
+   Didn't move any of the functions because there were no logical classes to
+      put it in.
+
+worldmodel.py
+   nearest_entity - Didnt move because no logical class to put it in since 
+      it doesn't contain a parameter that takes in a class.
+
+worldview.py
+   viewport_to_world - No logical classes to put it in.
+   world_to_viewport - No logical classes to put it in.
+   clamp - No logical classes to put it in.
+   create_shifted_viewport - No logical classes to put it in.

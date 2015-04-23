@@ -174,66 +174,6 @@ class WorldModel:
 
       return None
  
-
-   def schedule_miner(self, miner, ticks, i_store):
-      self.schedule_action_for(miner, miner.create_miner_action(self, i_store),
-         ticks + miner.get_rate())
-      self.schedule_animation(miner)
-
-
-   def schedule_vein(self, vein, ticks, i_store):
-      self.schedule_action_for(vein, vein.create_vein_action(self, i_store),
-         ticks + vein.get_rate())
-
-
-   def schedule_ore(self, ore, ticks, i_store):
-      self.schedule_action_for(ore,
-         ore.create_ore_transform_action(self, i_store),
-         ticks + ore.get_rate())
-
-
-   def schedule_blob(self, blob, ticks, i_store):
-      self.schedule_action_for(blob, blob.create_ore_blob_action(self, i_store),
-         ticks + blob.get_rate())
-      self.schedule_animation(blob)
-
-
-   def schedule_quake(self, quake, ticks):
-      self.schedule_animation(quake, QUAKE_STEPS)
-      self.schedule_action_for(quake, self.create_entity_death_action(quake),
-         ticks + QUAKE_DURATION)
-
-
-   def create_blob(self, name, pt, rate, ticks, i_store):
-      blob = entities.OreBlob(name, pt, rate,
-         image_store.get_images(i_store, 'blob'),
-         random.randint(BLOB_ANIMATION_MIN, BLOB_ANIMATION_MAX)
-         * BLOB_ANIMATION_RATE_SCALE)
-      self.schedule_blob(blob, ticks, i_store)
-      return blob
-
-
-   def create_ore(self, name, pt, ticks, i_store):
-      ore = entities.Ore(name, pt, image_store.get_images(i_store, 'ore'),
-         random.randint(ORE_CORRUPT_MIN, ORE_CORRUPT_MAX))
-      self.schedule_ore(ore, ticks, i_store)
-
-      return ore
-
-
-   def create_quake(self, pt, ticks, i_store):
-      quake = entities.Quake("quake", pt,
-         image_store.get_images(i_store, 'quake'), QUAKE_ANIMATION_RATE)
-      self.schedule_quake(quake, ticks)
-      return quake
-
-
-   def create_vein(self, name, pt, ticks, i_store):
-      vein = entities.Vein("vein" + name,
-         random.randint(VEIN_RATE_MIN, VEIN_RATE_MAX),
-         pt, image_store.get_images(i_store, 'vein'))
-      return vein
-
    def create_entity_death_action(self, entity):
       def action(current_ticks):
          entity.remove_pending_action(action)
@@ -275,7 +215,6 @@ class WorldModel:
       for action in entity.get_pending_actions():
          self.unschedule_action(action)
       entity.clear_pending_actions()
-
 
 
 def nearest_entity(entity_dists):
