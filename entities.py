@@ -281,7 +281,7 @@ class Vein(Pending_actions):
    def create_ore(self, world, name, pt, ticks, i_store):
       ore = Ore(name, pt, image_store.get_images(i_store, 'ore'),
          random.randint(ORE_CORRUPT_MIN, ORE_CORRUPT_MAX))
-      world.schedule_ore(ore, ticks, i_store)
+      ore.schedule_ore(world, ticks, i_store)
 
       return ore
 
