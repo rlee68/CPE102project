@@ -30,10 +30,8 @@ public class WorldModel
       return (this.within_bounds(pt) && this.occupancy.get_cell(pt) != null);
    }
  
-   public double findNearest(Point pt, Class type)
+   public Entity find_nearest(Point pt, Class type)
    {
-      LinkedList<Entity> oftype = new LinkedList<>();
-      LinkedList<Integer> distances = new LinkedList<>();
    }
 
    public List<Point> move_entity(Entity entity, Point pt)
@@ -41,7 +39,7 @@ public class WorldModel
       List<Point> tiles = new LinkedList<Point>();
       if (this.within_bounds(pt))
       {
-         Point old_pt = entity.get_postion();
+         Point old_pt = entity.get_position();
          this.occupancy.set_cell(old_pt, null);
          tiles.add(old_pt);
          this.occupancy.set_cell(pt, entity);

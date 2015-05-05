@@ -141,4 +141,14 @@ public class TestCases
    {
       assertTrue(wm.within_bounds(p2));
    }
+
+   @Test
+   public Void test_isOccupied()
+   {
+      WorldModel w = new WorldModel(2,3);
+      Point pt = new Point(1,0);
+      assertTrue(w.is_occupied(pt));
+   }
+  
 }
+
