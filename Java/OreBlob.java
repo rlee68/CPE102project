@@ -16,7 +16,7 @@ public class OreBlob
       return this.rate;
    }
   
-   public double animation_rate()
+   public double get_animation_rate()
    {
       return this.animation_rate;
    }

@@ -1,21 +1,22 @@
 public class Ore
-   extend Entity
+   extends Entity
 {
    private double rate;
   
-   public Ore(String name, Point position)
+   public Ore(String name, Point position, double rate)
    {
       super(name, position);
-      double rate = 5000;
-      self.rate = rate;
+      this.rate = rate;
    }
 
    public double get_rate()
    {
-      return self.rate;
+      return this.rate;
    }
   
    public String entity_string()
    {
+      return "ore" + " " + this.get_name() + " " + this.get_position().getX() +
+         " " + this.get_position().getY() + " " + this.get_rate();
    }
 }

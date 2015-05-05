@@ -20,4 +20,11 @@ public class Miner
    {
       return this.animation_rate;
    }
+
+   public String entity_string()
+   {
+      return "miner" + " " + this.get_name() + " " + this.get_position().getX()
+         + " " + this.get_position().getY() + " " + this.get_resource_limit() +
+         " " + this.get_rate() + " " + this.get_animation_rate();
+   }
 }

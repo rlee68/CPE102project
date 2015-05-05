@@ -24,5 +24,8 @@ public class Vein
   
    public String entity_string()
    {
+      return "vein" + " " + this.get_name() + " " + this.get_position().getX() +
+         " " + this.get_position().getY() + " " + this.get_rate() + " " +
+         this.get_resource_distance();
    }
 }

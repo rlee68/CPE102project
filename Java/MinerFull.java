@@ -5,7 +5,7 @@ public class MinerFull
 
    public MinerFull(String name, Point position, double resource_limt, double rate, double animation_rate)
    {
-      super(name, position, resource_limt, rate, animation_rate);
+      super(name, position, resource_limit, rate, animation_rate);
       this.resource_count = resource_limit;
    }
 }

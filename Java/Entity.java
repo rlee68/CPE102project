@@ -9,17 +9,17 @@ public class Entity
       this.position = position;
    }
 
-   public double set_position(Point point)
+   public void set_position(Point point)
    {
       this.position = point;
    }
   
-   public double get_position()
+   public Point get_position()
    {
       return this.position;
    }
 
-   public get_name()
+   public String get_name()
    {
       return this.name;
    }

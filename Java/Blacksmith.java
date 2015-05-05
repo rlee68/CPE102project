@@ -2,12 +2,11 @@ public class Blacksmith
    extends Collectors
 {
    private double rate;
-   private doube resource_distance;
+   private double resource_distance;
   
-   public Blacksmith(String name, Point postion, double resource_limit, double rate)
+   public Blacksmith(String name, Point postion, double resource_limit, double rate, double resource_distance)
    {
       super(name, position, resource_limit);
-      double resource_distance = 1;
       this.rate = rate;
       this.resource_distance = resource_distance;
    }
@@ -24,5 +23,8 @@ public class Blacksmith
 
    public String entity_string()
    { 
+      return "blacksmith" + this.get_name() + " " + this.get_position().getX() +
+         " " + this.get_position().getY() + " " + this.get_resource_limit()  
+         + " " + this.get_rate() + " " + this.get_resource_distance();
    }
 }
