@@ -1,26 +1,25 @@
+import processing.core.*;
+import java.util.List;
+import java.util.ArrayList;
+
 public class Entity
+   extends WorldObject
 {
-   private String name;
    private Point position;
   
-   public Entity(String name, Point position)
+   public Entity(String name, Point position, List<PImage> imgs)
    {
-      this.name = name;
+      super(name, imgs);
       this.position = position;
    }
-
-   public void set_position(Point point)
+ 
+   public Point set_position(Point pt)
    {
-      this.position = point;
+      this.position = pt;
    }
-  
+
    public Point get_position()
    {
       return this.position;
-   }
-
-   public String get_name()
-   {
-      return this.name;
    }
 }

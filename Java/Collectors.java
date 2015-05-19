@@ -1,27 +1,31 @@
-public class Collectors
-   extends Entity
-{
-   private double resource_count;
-   private double resource_limit;
+import processing.core.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
-   public Collectors(String name, Point position, double resource_limit)
+public class Collectors
+   extends Animated
+{
+   private int resource_count = 0;
+   private int resource_limit;
+ 
+   public Collectors(String name, Point position, int rate, List<PImage> imgs, int animation_rate, int resource_limit)
    {
-      super(name, position);
+      super(name, position, rate, imgs, animation_rate);
       this.resource_limit = resource_limit;
-      this.resource_count = 0;
    }
-  
-   public double set_resource_count(double n)
+
+   public int set_resource_count(int n)
    {
       this.resource_count = n;
    }
-  
-   public double get_resource_count()
+ 
+   public int get_resource_count()
    {
       return this.resource_count;
    }
 
-   public double get_resource_limit()
+   public int get_resource_limit()
    {
       return this.resource_limit;
    }

@@ -1,14 +1,12 @@
+import java.util.List;
+import java.util.ArrayList;
+import processing.core.*;
+
 public class Background
+   extends WorldObject
 {
-   private String name;
-
-   public Background(String name)
+   public Background(String name, List<PImage> imgs)
    {
-      this.name = name;
-   }
-
-   public String get_name()
-   {
-      return this.name;
+      super(name, imgs);
    }
 }

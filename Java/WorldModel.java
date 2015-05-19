@@ -1,23 +1,62 @@
+import processing.core.*;
+import java.util.function.LongConsumer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.lang.Math;
 
 public class WorldModel
 {
    private int rows;
    private int cols;
    private List<Entity> entities;
-   private Grid background;
-   private Grid occupancy;
+   private Background[][] background;
+   private Entity[][] occupancy;
+   private OrderedList<Action> action_queue;
  
    public WorldModel(int rows, int cols, Background backgroud)
    {
       this.rows = rows;
       this.cols = cols;
       this.entities = new ArrayList<Entity>();
-      this.background = new Grid(this.cols, this.rows, null);
-      this.occupancy = new Grid(this.cols, this.rows, null);
+      this.action_queue = new OrderedList<Action>();
+      this.background = new Background[rows][cols];
+      for (int i = 0; i < rows; i++)
+      {
+         for (int j = 0; j < cols; j++)
+         {
+            background[i][j] = background;
+         }
+      }
+      this.occupancy = new Entity[rows][cols];
+      for (int y = 0; y < rows; y++)
+      {
+         for (int x = 0; x < cols; x++)
+         {      
+            occupancy[y][x] = null;
+         }
+      }
+   }
+
+   public int get_rows()
+   {
+      return this.rows;
+   }
+   
+   public int get_cols()
+   {
+      return this.cols;
+   }
+
+   public Entity[][] get_occupancy()
+   {
+      return this.occupancy;
+   }
+
+   public List<Entity> get_entities()
+   {
+      return this.entities;
    }
 
    public boolean within_bounds(Point pt)
@@ -32,6 +71,15 @@ public class WorldModel
  
    public Entity find_nearest(Point pt, Class type)
    {
+      ArrayList<Integer> same = new ArrayList<Integer>();
+      for (int i = 0; i < this.entities.size(); i++)
+      {
+         if(this.entities.get(i).getClass() == e.getClass())
+         {
+            same.add(i);
+         }
+      }
+      return nearest_entity(same, pt);
    }
 
    public List<Point> move_entity(Entity entity, Point pt)
@@ -49,9 +97,34 @@ public class WorldModel
       return tiles;
    }
 
-   public void remove_entity(Entity entity)
+   public void add_entity(Entity e)
    {
-      this.remove_entity_at(entity.get_position());
+      Point pt = e.get_position();
+  
+      if (this.within_bounds(pt))
+      {
+         Entity old_entity = this.occupancy[pt.getY()][pt.getX()];
+         if (old_entity != null && (old_entity instanceof Entity ||
+             old_entity instanceof Obstacle))
+         {
+            if (old_entity instanceof Entity)
+            {
+               Entity old = old_entity;
+               old.clear_pending_actions();
+            }
+         } 
+         else
+         {
+            Obstacle old = (Entity) old_entity;
+         }
+      }
+      this.occupancy.set_cell(pt, e);
+      this.entities.add(e);
+   }
+ 
+   public void remove_entity(Entity e)
+   {
+      this.remove_entity_at(e.get_position());
    }
 
    public void remove_entity_at(Point pt)
@@ -69,15 +142,26 @@ public class WorldModel
    {
       if (this.within_bounds(pt))
       {
-         return background.get_cell(pt);
+         return this.background[pt.getY()][pt.getX()];
       }
+      return null;
    }
  
+   public PImage get_background_image(Point pt)
+   {
+      Background bgnd = get_background(pt);
+      if (bgnd != null)
+      {
+         return bgnd.get_image();
+      }
+      return null;
+   }
+
    public void set_background(Point pt, Background background)
    {
       if (this.within_bounds(pt))
       {
-         this.background.set_cell(pt, background);
+         this.background[pt.getY()][pt.getX()] = background;
       }
    }
 
@@ -85,38 +169,19 @@ public class WorldModel
    {
       if (this.within_bounds(pt))
       {
-         return this.occupancy.get_cell(pt);
+         return this.occupancy[pt.getY()][pt.getX()];
       }
-      else 
+      return null;
+   }
+
+   public void set_tile_occupant(Point pt, Entity e)
+   {
+      if(this.within_bounds(pt))
       {
-         return null;
+         this.occupancy[pt.getY()][pt.getX()] = e;
       }
    }
  
-   public List<Entity> get_entities()
-   {
-      return this.entities;
-   }
-
-   public Point next_position(Point e_pt, Point d_pt)
-   {
-      int horiz = this.sign(d_pt.getX() - e_pt.getX());
-      Point new_pt = new Point(e_pt.getX() + horiz, e_pt.getY());
-     
-      if (horiz == 0 || this.is_occupied(new_pt))
-      {
-         int vert = this.sign(d_pt.getY() - e_pt.getY());
-         new_pt = new Point(e_pt.getX(), e_pt.getY() + vert);
-
-         if (vert == 0 || this.is_occupied(new_pt))
-         {
-            new_pt = new Point(e_pt.getX(), e_pt.getY());
-         }
-      }
-
-      return new_pt;
-   }  
-
    public Point find_open_around(Point pt, int distance)
    {
       for (int i = -distance; i <= distance; distance++)
@@ -176,7 +241,68 @@ public class WorldModel
       return nearest;
    }
 
-   public static int sign(int x) {
+   public void schedule_action(Action a, long time)
+   {
+      this.action_queue.insert(a,time);
+   }
+
+   public void unschedule_action(Action a)
+   {
+      boolean still_removing = false;
+      while(still_removing)
+      {
+         still_removing = this.action_queue.removie(a);
+      }
+   }
+
+   public List<Point> update_on_time(long ticks)
+   {
+      List<Point> tiles = new ArrayList<Point>();
+      ListItem<Action> next = this.action_queue.head();
+      while(next != null && next.getOrd() < ticks)
+      {
+         this.action_queue.pop();
+         Point[] tile = next.getItem().act(ticks);
+         for(int i = 0; i < tile.length; i++)
+         {
+            if(tile[i] != null)
+            {
+               tiles.add(tile[i]);
+            }
+         }
+         next = this.action_queue.head();
+      }
+      return tiles;
+   }
+
+   public void schedule_action_for(Entity e, Action a, long time)
+   {
+      e.add_pending_action(a);
+      schedule_action(a, time);
+   }
+
+   public void schedule_animation(Entity e, int repeat_count)
+   {
+      schedule_action(e, e.create_animation_action(this, repeat_count),
+         System.currentTimeMillis() + e.get_animation_rate());
+   }
+ 
+   public void schedule_animation(Entity e)
+   {
+      schedule_animation(e, 0);
+   }
+
+   public void clear_pending_actions(Entity e);
+   {
+      for(Action a: e.get_pending_actions())
+      {
+         unschedule_action(a);
+      }
+      e.clear_pending_actions();
+   }
+
+   public static int sign(int x) 
+   {
       if (x < 0) 
       {
          return -1;
@@ -189,5 +315,10 @@ public class WorldModel
       {
          return 0;
       }
-    }
+   }
+
+   public static int random(int min, int max)
+   {
+      return (int)Math.floor((Math.random() * (max - min)) + min);
+   } 
 }

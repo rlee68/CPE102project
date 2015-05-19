@@ -1,22 +1,19 @@
+import java.util.List;
+import java.util.ArrayList;
+import processing.core.*;
+
 public class Blacksmith
    extends Collectors
 {
-   private double rate;
-   private double resource_distance;
-  
-   public Blacksmith(String name, Point postion, double resource_limit, double rate, double resource_distance)
+   public int resource_distance;
+
+   public Blacksmith(String name, Point postion, int rate, List<PImage> imgs, int resource_limit, int resource_distance)
    {
-      super(name, position, resource_limit);
-      this.rate = rate;
+      super(name, position, rate, imgs, 0, resource_limit);
       this.resource_distance = resource_distance;
    }
-  
-   public double get_rate()
-   {
-      return this.rate;
-   }
 
-   public double get_resource_distance()
+   public int get_resource_distance()
    {
       return this.resource_distance;
    }
