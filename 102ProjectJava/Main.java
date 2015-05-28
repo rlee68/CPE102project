@@ -1,9 +1,5 @@
 import processing.core.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.io.FileNotFoundException;
 import java.io.File;
 
@@ -71,6 +67,7 @@ public class Main extends PApplet
       }
 
       view.drawViewport();
+      drawPath();
    }
 
    public void keyPressed()
@@ -95,6 +92,33 @@ public class Main extends PApplet
                break;
          }
          view.updateView(dx, dy);
+      }
+   }
+
+   public void drawPath()
+   {
+      int x = mouseX / TILE_WIDTH;
+      int y = mouseY / TILE_HEIGHT;
+
+      Point pt = view.viewportToWorld(WorldView.viewport, x, y);
+
+      if(world.isOccupied(pt))
+      {
+         try
+         {
+            MobileAnimatedActor animatedActor = (MobileAnimatedActor) world.getTileOccupant(pt);
+            ArrayList<Point> path = animatedActor.getPath();
+            for (int i = 0; i < path.size() - 1; i++)
+            {
+               Point pt2 = view.worldToViewport(WorldView.viewport, path.get(i).x, path.get(i).y);
+               rect((pt2.x * TILE_WIDTH) + (TILE_WIDTH / 8),
+                    (pt2.y * TILE_HEIGHT) + (TILE_HEIGHT / 8), 20, 20);
+            }
+         }
+         catch (ClassCastException e)
+         {
+
+         }
       }
    }
 
