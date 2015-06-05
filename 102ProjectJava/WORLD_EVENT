@@ -1,0 +1,9 @@
+1) Right click causes the wyvern and yoshi to spawn.
+   Left click causes a field of flowers to take up 5*5 tiles around the mouse.
+
+2) The wyvern goes and changes the miners into mario and the yoshi goes and 
+   changes the ores into green mushrooms.
+
+3) The mario then goes and collect the mushrooms.
+
+4) Same as #2. 
