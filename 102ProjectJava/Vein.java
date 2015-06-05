@@ -32,6 +32,11 @@ public class Vein
          this.resourceDistance);
    }
 
+   protected boolean canPlace(WorldModel world, Point pt)
+   {
+      return !(world.isOccupied(pt));
+   }
+
    public Action createAction(WorldModel world, ImageStore imageStore)
    {
       Action[] action = { null };
@@ -39,7 +44,7 @@ public class Vein
          removePendingAction(action[0]);
 
          Point openPt = findOpenAround(world, getPosition(), resourceDistance);
-         if (openPt != null)
+         if (openPt != null && canPlace(world, openPt))
          {
             Ore ore = createOre(world, "ore - " + getName() + " - " + ticks,
                openPt, ticks, imageStore);

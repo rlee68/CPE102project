@@ -2,7 +2,7 @@ import processing.core.PImage;
 import java.util.List;
 import java.util.Random;
 
-public class Ore
+public class Mushroom
    extends Actor
 {
    private static final int DEFAULT_RATE = 5000;
@@ -13,12 +13,12 @@ public class Ore
 
    private static final Random rand = new Random();
 
-   public Ore(String name, Point position, int rate, List<PImage> imgs)
+   public Mushroom(String name, Point position, int rate, List<PImage> imgs)
    {
       super(name, position, rate, imgs);
    }
 
-   public Ore(String name, Point position, List<PImage> imgs)
+   public Mushroom(String name, Point position, List<PImage> imgs)
    {
       this(name, position, DEFAULT_RATE, imgs);
    }
@@ -29,14 +29,9 @@ public class Ore
          this.getPosition().x, this.getPosition().y, this.getRate());
    }
 
-   public boolean canPlace(WorldModel world, Point pt)
-   {
-      return !(world.getTileOccupant(pt) instanceof Obstacle);
-   }
-
    public Action createAction(WorldModel world, ImageStore imageStore)
    {
-      Action[] action = { null };
+     /* Action[] action = { null };
       action[0] = ticks -> {
          removePendingAction(action[0]);
          if(canPlace(world, getPosition()))
@@ -48,17 +43,7 @@ public class Ore
             world.addEntity(blob);
          }
       };
-      return action[0];
-   }
-
-   private static OreBlob createBlob(WorldModel world, String name,
-      Point pt, int rate, long ticks, ImageStore imageStore)
-   {
-      OreBlob blob = new OreBlob(name, pt, rate,
-         BLOB_ANIMATION_RATE_SCALE * (BLOB_ANIMATION_MIN +
-            rand.nextInt(BLOB_ANIMATION_MAX - BLOB_ANIMATION_MIN)),
-         imageStore.get("blob"));
-      blob.schedule(world, ticks, imageStore);
-      return blob;
+      return action[0];*/
+      return null;
    }
 }

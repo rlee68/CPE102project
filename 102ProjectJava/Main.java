@@ -1,5 +1,9 @@
 import processing.core.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.File;
 
@@ -25,7 +29,7 @@ public class Main extends PApplet
    private long next_time;
    private WorldModel world;
    private WorldView view;
-
+   private List<PImage> imgs;
 
    public void setup()
    {
@@ -67,7 +71,6 @@ public class Main extends PApplet
       }
 
       view.drawViewport();
-      drawPath();
    }
 
    public void keyPressed()
@@ -95,29 +98,39 @@ public class Main extends PApplet
       }
    }
 
-   public void drawPath()
+   public void mousePressed()
    {
-      int x = mouseX / TILE_WIDTH;
-      int y = mouseY / TILE_HEIGHT;
+      int mx = (mouseX + (view.getView().getCol() * 32))/32;
+      int my = (mouseY + (view.getView().getRow() * 32))/32;
 
-      Point pt = view.viewportToWorld(WorldView.viewport, x, y);
-
-      if(world.isOccupied(pt))
-      {
-         try
+      if (mouseButton == RIGHT)
+      {      
+         if(!world.isOccupied(new Point(mx + 1, my)) && !world.isOccupied(new Point(mx - 1, my)))
          {
-            MobileAnimatedActor animatedActor = (MobileAnimatedActor) world.getTileOccupant(pt);
-            ArrayList<Point> path = animatedActor.getPath();
-            for (int i = 0; i < path.size() - 1; i++)
-            {
-               Point pt2 = view.worldToViewport(WorldView.viewport, path.get(i).x, path.get(i).y);
-               rect((pt2.x * TILE_WIDTH) + (TILE_WIDTH / 8),
-                    (pt2.y * TILE_HEIGHT) + (TILE_HEIGHT / 8), 20, 20);
-            }
+            Actor new_entity = new Wyvern("wyvern", new Point(mx - 1, my), WYVERN_RATE, WYVERN_ANIMATION_RATE, imageStore.get(WYVERN_KEY));
+            world.addEntity(new_entity);
+            new_entity.schedule(world, System.currentTimeMillis() + new_entity.getRate(), imageStore);
+
+            Actor yoshi = new Yoshi("wyvern", new Point(mx + 1, my), WYVERN_RATE, WYVERN_ANIMATION_RATE, imageStore.get("yoshi"));
+            world.addEntity(yoshi);
+            yoshi.schedule(world, System.currentTimeMillis() + new_entity.getRate(), imageStore);
+
          }
-         catch (ClassCastException e)
+      }
+      
+      if (mouseButton == LEFT)
+      {
+         for(int i = -2; i < 3; i++)
          {
-
+            for(int j = -2; j < 3; j++)
+            {
+               if (!(world.isOccupied(new Point(mx + i, my + j))))
+               {
+                  world.setBackground(new Point(mx + i , my + j), new Background("flower", imageStore.get("flower")));
+                  WorldEntity obstacle = new Obstacle("obs", new Point(mx + i, my + j), imageStore.get("flower"));
+                  world.addEntity(obstacle);
+               }
+            }
          }
       }
    }
@@ -211,6 +224,15 @@ public class Main extends PApplet
    private static final int VEIN_COL = 2;
    private static final int VEIN_ROW = 3;
    private static final int VEIN_REACH = 5;
+
+   private static final String WYVERN_KEY = "wyvern";
+   private static final int WYVERN_NUM_PROPERTIES = 7;
+   private static final int WYVERN_NAME = 1;
+   private static final int WYVERN_COL = 2;
+   private static final int WYVERN_ROW = 3;
+   private static final int WYVERN_LIMIT = 4;
+   private static final int WYVERN_RATE = 500;
+   private static final int WYVERN_ANIMATION_RATE = 6;
 
    private static Map<String, PropertyParser> buildPropertyParsers(
       WorldModel world, ImageStore imageStore, long time)

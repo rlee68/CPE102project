@@ -7,7 +7,7 @@ public class WorldView
    private WorldModel world;
    private int tileWidth;
    private int tileHeight;
-   protected static Viewport viewport;
+   private Viewport viewport;
 
    public WorldView(int numCols, int numRows, PApplet screen, WorldModel world,
       int tileWidth, int tileHeight)
@@ -17,6 +17,11 @@ public class WorldView
       this.tileWidth = tileWidth;
       this.tileHeight = tileHeight;
       this.viewport = new Viewport(numRows, numCols);
+   }
+
+   public Viewport getView()
+   {
+      return this.viewport;
    }
 
    public void drawViewport()
@@ -66,12 +71,12 @@ public class WorldView
       return Math.min(max, Math.max(v, min));
    }
 
-   protected static Point viewportToWorld(Viewport viewport, int col, int row)
+   private static Point viewportToWorld(Viewport viewport, int col, int row)
    {
       return new Point(col + viewport.getCol(), row + viewport.getRow());
    }
 
-   protected static Point worldToViewport(Viewport viewport, int col, int row)
+   private static Point worldToViewport(Viewport viewport, int col, int row)
    {
       return new Point(col - viewport.getCol(), row - viewport.getRow());
    }

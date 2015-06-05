@@ -28,3 +28,15 @@ quake images/quake6.bmp 255 255 255 0
 rocks images/rock.bmp
 vein images/vein.bmp
 background_default images/none.bmp
+wyvern images/wyvern1.bmp 255 255 255 0
+wyvern images/wyvern2.bmp 255 255 255 0
+wyvern images/wyvern3.bmp 255 255 255 0
+wyvern images/wyvern4.bmp 255 255 255 0
+wyvern images/wyvern5.bmp 255 255 255 0
+wyvern images/wyvern6.bmp 255 255 255 0
+wyvern images/wyvern7.bmp 255 255 255 0
+wyvern images/wyvern8.bmp 255 255 255 0
+flower images/flower.bmp
+mushroom images/mushroom.png
+mario images/Mario.png
+yoshi images/yoshi.gif
